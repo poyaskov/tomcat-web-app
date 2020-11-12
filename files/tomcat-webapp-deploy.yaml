@@ -1,0 +1,70 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat-web-app-svc
+  labels:
+    app: tomcat-web-app
+spec:
+  type: NodePort
+  ports:
+   - port: 80
+  selector:
+   app: tomcat-web-app
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: px-tomcat-web-app
+   annotations:
+     volume.beta.kubernetes.io/storage-class: px-db-repl3-sc
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-web-app
+  labels:
+    app: tomcat-web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcat-web-app
+  template:
+    metadata:
+      labels:
+        app: tomcat-web-app
+    spec:
+      initContainers:
+        - name: www-html-vol
+          image: busybox
+          command:
+            - sh
+            - '-c'
+            - 'chown -R 33:33 /var/www'
+          volumeMounts:
+            - name: apachehome
+              mountPath: /var/www/html
+          imagePullPolicy: IfNotPresent
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: tomcat-web-app
+        image: registry.crdsmart.city/tomcat-web-app:latest
+        imagePullPolicy: "Always"
+        ports:
+        - containerPort: 80
+        volumeMounts: 
+#        - name: apachehome
+#          mountPath: /var/www/html
+      volumes:
+      - name: apachehome
+        persistentVolumeClaim:
+          claimName: px-tomcat-web-app
