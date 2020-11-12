@@ -12,3 +12,6 @@ Any code commit in the GitHub triggering the build in the [Jenkins](https://jenk
 Jenkins pipeline is building new image based on Dockerfile and deployng it to the Kubernetes cluster.
 
 Here is final result:  [Web-calculator JSP page](https://test-app.poyaskov.ca/web-calc/).
+
+------------------------------------------
+(c) Vadim Poyaskov, Toronto, 2020
